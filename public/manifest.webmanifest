@@ -1,0 +1,9 @@
+{
+  "name": "JumbiTech Portal",
+  "short_name": "JumbiTech",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF8F4",
+  "theme_color": "#8B6F3B",
+  "icons": []
+}
