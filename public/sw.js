@@ -4,7 +4,7 @@
  * Data requests (Supabase) are NOT intercepted: auth and RLS responses must
  * never be served stale from a shared cache.
  */
-const CACHE = 'jtp-cache-v1';
+const CACHE = 'jtp-cache-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest'];
 const SHELL_DEADLINE_MS = 3500;
 

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 export default function Login() {
-  const [mode, setMode] = useState('signin'); // signin | mfa
+  const [mode, setMode] = useState('signin'); // signin | signup | mfa
   const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [factorId, setFactorId] = useState(null);
@@ -34,6 +35,21 @@ export default function Login() {
     }
     // No MFA enrolled yet, or already satisfied: the app router will route them
     // onward (to enrolment if needed).
+    window.location.reload();
+  }
+
+  async function signUp(e) {
+    e.preventDefault();
+    setError('');
+    setBusy(true);
+    const { error: upErr } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    });
+    if (upErr) { setError(upErr.message); setBusy(false); return; }
+    // Auto-confirm is on, so a session exists now; the router will push the
+    // new user straight into MFA enrolment.
     window.location.reload();
   }
 
@@ -68,6 +84,29 @@ export default function Login() {
           <div style={{ marginTop: '1.25rem' }}>
             <button className="btn" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
           </div>
+          <p className="muted" style={{ marginTop: '1rem' }}>
+            New to the portal?{' '}
+            <a href="#" onClick={(e) => { e.preventDefault(); setError(''); setMode('signup'); }}>Create an account</a>
+          </p>
+        </form>
+      )}
+
+      {mode === 'signup' && (
+        <form onSubmit={signUp}>
+          <label htmlFor="name">Full name</label>
+          <input id="name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          <label htmlFor="email2">Email</label>
+          <input id="email2" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="username" />
+          <label htmlFor="pw2">Choose a password</label>
+          <input id="pw2" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={10} autoComplete="new-password" />
+          <p className="muted" style={{ fontSize: '.85rem' }}>At least 10 characters. You will set up two-factor authentication next.</p>
+          <div style={{ marginTop: '1.25rem' }}>
+            <button className="btn" type="submit" disabled={busy}>{busy ? 'Creating account…' : 'Create account'}</button>
+          </div>
+          <p className="muted" style={{ marginTop: '1rem' }}>
+            Already registered?{' '}
+            <a href="#" onClick={(e) => { e.preventDefault(); setError(''); setMode('signin'); }}>Sign in</a>
+          </p>
         </form>
       )}
 
