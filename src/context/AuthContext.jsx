@@ -40,7 +40,8 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (event === 'PASSWORD_RECOVERY') sessionStorage.setItem('jtp_recovery', '1');
       setSession(newSession);
       if (newSession) {
         await loadProfile(newSession.user.id);

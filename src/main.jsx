@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Shell from './components/Shell';
 import Login from './pages/Login';
 import MfaSetup from './pages/MfaSetup';
+import SetPassword from './pages/SetPassword';
 
 // Candidate pages
 import CandidateHome from './pages/candidate/Home';
@@ -35,10 +36,14 @@ if ('serviceWorker' in navigator) {
 console.log('JumbiTech Portal build', APP_BUILD);
 
 function Protected() {
-  const { loading, session, role, hasMfaEnrolled, mfaSatisfied } = useAuth();
+  const { loading, session, user, role, hasMfaEnrolled, mfaSatisfied } = useAuth();
 
   if (loading) return <div className="spinner">Loading…</div>;
   if (!session) return <Login />;
+
+  // Invited users and password-recovery arrivals must set a password first.
+  const needsPassword = user?.user_metadata?.invited === true || sessionStorage.getItem('jtp_recovery') === '1';
+  if (needsPassword) return <SetPassword />;
 
   // Force MFA: if no factor enrolled, or enrolled but this session has not yet
   // satisfied the challenge, send to the MFA flow.

@@ -86,5 +86,20 @@ t('anon key present, service-role key absent from source', () => {
   ok(!/service_role/i.test(cfg), 'service role must never ship');
 });
 
+// ------------------------------------------------- account control invariants
+t('login page offers no self-registration', () => {
+  const login = readFileSync('src/pages/Login.jsx', 'utf8');
+  ok(!login.includes('signUp'), 'signup handler still present');
+  ok(!/Create an account/.test(login), 'signup link still present');
+});
+t('admin function requires staff and aal2, never leaks service key client-side', () => {
+  const fn = readFileSync('supabase/functions/admin-users/index.ts', 'utf8');
+  ok(fn.includes('aal !== "aal2"'), 'aal2 gate missing');
+  ok(fn.includes('prof?.role !== "staff"'), 'staff gate missing');
+  const client = readFileSync('src/pages/staff/Candidates.jsx', 'utf8');
+  ok(!/service_role/i.test(client), 'service role referenced client-side');
+  ok(client.includes("functions.invoke('admin-users'"), 'admin function not wired');
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
